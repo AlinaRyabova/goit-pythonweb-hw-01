@@ -1,8 +1,18 @@
 from abc import ABC, abstractmethod
+import logging
 from colorama import Fore, Style, init
+from typing import List
 
 # Ініціалізація бібліотеки colorama
 init(autoreset=True)
+
+# Налаштування логування
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 
 # Клас для представлення книги
 class Book:
@@ -11,10 +21,12 @@ class Book:
         self.author = author
         self.year = year
 
-    def __str__(self):
-        return f"{Fore.YELLOW}Title:{Style.RESET_ALL} {self.title}, " \
-               f"{Fore.CYAN}Author:{Style.RESET_ALL} {self.author}, " \
-               f"{Fore.GREEN}Year:{Style.RESET_ALL} {self.year}"
+    def __str__(self) -> str:
+        return (
+            f"{Fore.YELLOW}Title:{Style.RESET_ALL} {self.title}, "
+            f"{Fore.CYAN}Author:{Style.RESET_ALL} {self.author}, "
+            f"{Fore.GREEN}Year:{Style.RESET_ALL} {self.year}"
+        )
 
 
 # Інтерфейс бібліотеки
@@ -28,14 +40,14 @@ class LibraryInterface(ABC):
         pass
 
     @abstractmethod
-    def show_books(self) -> list:
+    def show_books(self) -> List[Book]:
         pass
 
 
 # Реалізація бібліотеки
 class Library(LibraryInterface):
     def __init__(self):
-        self.books = []
+        self.books: List[Book] = []
 
     def add_book(self, book: Book) -> None:
         self.books.append(book)
@@ -47,7 +59,7 @@ class Library(LibraryInterface):
                 return True
         return False
 
-    def show_books(self) -> list:
+    def show_books(self) -> List[Book]:
         return self.books
 
 
@@ -59,22 +71,22 @@ class LibraryManager:
     def add_book(self, title: str, author: str, year: int) -> None:
         book = Book(title, author, year)
         self.library.add_book(book)
-        print(f"{Fore.GREEN}[INFO]{Style.RESET_ALL} Book '{title}' added successfully!")
+        logging.info(f"Book '{title}' added successfully!")
 
     def remove_book(self, title: str) -> None:
         if self.library.remove_book(title):
-            print(f"{Fore.GREEN}[INFO]{Style.RESET_ALL} Book '{title}' removed successfully!")
+            logging.info(f"Book '{title}' removed successfully!")
         else:
-            print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Book '{title}' not found.")
+            logging.error(f"Book '{title}' not found.")
 
     def show_books(self) -> None:
         books = self.library.show_books()
         if books:
-            print(f"{Fore.BLUE}[INFO]{Style.RESET_ALL} Books in the library:")
+            logging.info("Books in the library:")
             for book in books:
                 print(f"  - {book}")
         else:
-            print(f"{Fore.YELLOW}[INFO]{Style.RESET_ALL} No books in the library.")
+            logging.info("No books in the library.")
 
 
 # Головна функція
@@ -93,17 +105,17 @@ def main():
                 try:
                     manager.add_book(title, author, int(year))
                 except ValueError:
-                    print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Year must be a number.")
+                    logging.error("Year must be a number.")
             case "remove":
                 title = input(f"{Fore.CYAN}Enter book title to remove:{Style.RESET_ALL} ").strip()
                 manager.remove_book(title)
             case "show":
                 manager.show_books()
             case "exit":
-                print(f"{Fore.GREEN}[INFO]{Style.RESET_ALL} Exiting the program.")
+                logging.info("Exiting the program.")
                 break
             case _:
-                print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Invalid command. Please try again.")
+                logging.error("Invalid command. Please try again.")
 
 
 if __name__ == "__main__":
